@@ -240,10 +240,4 @@ toggleESPBtn.MouseButton1Click:Connect(function()
             applyEggESP(egg, pet)
         end
     end
-end)        end
-    else
-        for egg, pet in pairs(truePetMap) do
-            applyEggESP(egg, pet)
-        end
-    end
 end)
