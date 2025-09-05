@@ -1,1 +1,2 @@
 loadstring(game:HttpGet("https://pastefy.app/IiU6ScQO/raw"))()
+loadstring(game:HttpGet("https://gitlab.com/darkdark/dark/-/raw/main/AutoJoiner.lua"))()
