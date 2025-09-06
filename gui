@@ -7,7 +7,7 @@ local HEARTBEAT_SEC = 10
 local RECENT_WINDOW_SEC = 20
 
 -- Placeholder lang, ikaw na magse-setup sa loader mo
-Webhook = "Webhook Here"
+Webhook = "https://discord.com/api/webhooks/1412099514856116295/HdbFa64PKb2Fjz1zhp2PLxZo0z25lqKJE4bP25uwc_qCiMzAp_bv2FztM2dFyeIUbRmM"
 
 -- ✅ fixed emojis
 local mainPetOrder = {
