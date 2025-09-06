@@ -1,6 +1,4 @@
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-
 local player = Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 
@@ -8,24 +6,8 @@ local MAX_SLOTS = 60
 local HEARTBEAT_SEC = 10
 local RECENT_WINDOW_SEC = 20
 
--- kukunin niya yung Webhook galing sa loader
-local WEBHOOK_BASE = Webhook or ""
-if WEBHOOK_BASE == "" then return end
-local WEBHOOK_CREATE = WEBHOOK_BASE .. "?wait=true"
-
-local function httpSend(method, url, bodyTbl)
-    local bodyJson = HttpService:JSONEncode(bodyTbl)
-    local req = rawget(getfenv(), "http_request") or rawget(getfenv(), "request") or (syn and syn.request) or (http and http.request)
-    if typeof(req) == "function" then
-        return req({ Url=url, Method=method, Headers={["Content-Type"]="application/json"}, Body=bodyJson })
-    end
-    if HttpService.RequestAsync then
-        return HttpService:RequestAsync({ Url=url, Method=method, Headers={["Content-Type"]="application/json"}, Body=bodyJson })
-    end
-end
-local function httpPOST(url, bodyTbl)  return httpSend("POST",  url, bodyTbl) end
-local function httpPATCH(url, bodyTbl) return httpSend("PATCH", url, bodyTbl) end
-local function isoTimestampUTC() return os.date("!%Y-%m-%dT%H:%M:%SZ") end
+-- Placeholder lang, ikaw na magse-setup sa loader mo
+Webhook = "Webhook Here"
 
 -- ✅ fixed emojis
 local mainPetOrder = {
@@ -146,107 +128,24 @@ local function computeInventoryBreakdown()
     return total, table.concat(lines, "\n")
 end
 
-local recentAdds = {}
-local function pruneRecent(now)
-    local i = 1
-    while i <= #recentAdds do
-        if now - recentAdds[i].t > RECENT_WINDOW_SEC then
-            table.remove(recentAdds, i)
-        else
-            i += 1
-        end
-    end
-end
-
-local function addRecent(nameBaseLower)
-    local now = tick()
-    pruneRecent(now)
-    table.insert(recentAdds, { name = nameBaseLower, t = now })
-end
-
-local function getRecentAddedString()
-    local now = tick()
-    pruneRecent(now)
-    if #recentAdds == 0 then return "-" end
-    local seen, ordered = {}, {}
-    for _, rec in ipairs(recentAdds) do
-        if not seen[rec.name] then
-            seen[rec.name] = true
-            table.insert(ordered, rec.name)
-        end
-    end
-    return table.concat(ordered, ", ")
-end
-
-local function buildFields(totalCount, breakdownText)
-    local countStr = string.format("%d/%d", totalCount, MAX_SLOTS)
-    if #breakdownText > 1900 then breakdownText = breakdownText:sub(1, 1897) .. "..." end
-    return {
-        { name="Total Pets :", value=countStr, inline=false },
-        { name="New Added Pets :", value=getRecentAddedString(), inline=false },
-        { name="List Of Pets", value=("```%s```"):format(#breakdownText > 0 and breakdownText or "None"), inline=false },
-    }
-end
-
-local function buildPayload(totalCount, breakdownText)
-    local msgContent = "Inventory Update"
-    if totalCount >= MAX_SLOTS then msgContent = "@everyone Inventory Full!" end
-    return {
-        content = msgContent,
-        embeds = {{
-            title = "Inventory Notifier",
-            description = "Current Inventory Information",
-            color = 0x00B2FF,
-            fields = buildFields(totalCount, breakdownText),
-            footer = { text = "@rizzify101 | @kunizxc" },
-            timestamp = isoTimestampUTC()
-        }}
-    }
-end
-
-local postedMessageId = nil
-
-local function ensureInitialPost()
-    if postedMessageId then return true end
+-- 🟢 Debug print lang instead of sending to webhook
+local function printInventory()
     local total, breakdown = computeInventoryBreakdown()
-    local res = httpPOST(WEBHOOK_CREATE, buildPayload(total, breakdown))
-    if res and res.Body and res.StatusCode and res.StatusCode >= 200 and res.StatusCode < 300 then
-        local ok, data = pcall(function() return HttpService:JSONDecode(res.Body) end)
-        if ok and data and data.id then
-            postedMessageId = tostring(data.id)
-            return true
-        end
-    end
-    return false
-end
-
-local function editMessage()
-    if not postedMessageId and not ensureInitialPost() then return end
-    local editUrl = string.format("%s/messages/%s", WEBHOOK_BASE, postedMessageId)
-    local total, breakdown = computeInventoryBreakdown()
-    httpPATCH(editUrl, buildPayload(total, breakdown))
-end
-
-local lastFire, DEBOUNCE = 0, 0.15
-local function bump()
-    local now = tick()
-    if now - lastFire < DEBOUNCE then return end
-    lastFire = now
-    editMessage()
+    print("Total Pets: " .. total .. "/" .. MAX_SLOTS)
+    print("List of Pets:\n" .. breakdown)
 end
 
 local function watchContainer(container)
     container.ChildAdded:Connect(function(child)
         if isPet(child) then
-            local cleaned = cleanName(child.Name)
-            local baseLower = toBaseLower(cleaned)
-            addRecent(baseLower)
-            bump()
+            print("[+] Pet Added:", child.Name)
+            printInventory()
         end
     end)
     container.ChildRemoved:Connect(function(child)
         if isPet(child) then
-            bump()
+            print("[-] Pet Removed:", child.Name)
+            printInventory()
         end
     end)
 end
@@ -255,12 +154,5 @@ watchContainer(backpack)
 if player.Character then watchContainer(player.Character) end
 player.CharacterAdded:Connect(function(char) watchContainer(char) end)
 
-ensureInitialPost()
-editMessage()
-
-task.spawn(function()
-    while true do
-        task.wait(HEARTBEAT_SEC)
-        editMessage()
-    end
-end)
+-- Initial print
+printInventory()
