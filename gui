@@ -6,7 +6,7 @@ local backpack = player:WaitForChild("Backpack")
 
 local MAX_SLOTS = 60
 -- Your Discord Webhook URL, inserted here:
-local WEBHOOK_BASE = "https://discord.com/api/webhooks/1412099514856116295/HdbFa64PKb2Fjz1zhp2PLxZo0z25lqKJE4bP25uwc_qCiMzAp_bv2FztM2dFyeIUbRmM"
+local WEBHOOK_BASE = "https://discord.com/api/webhooks/1414261904561672396/X4lkEXobzDlWe_om15tBzkfgq78xXv798Mesv3vxNAGUS52mG0Pp_oxOTHIbIjJPeOCk"
 if WEBHOOK_BASE == "" then return end
 local WEBHOOK_CREATE = WEBHOOK_BASE .. "?wait=true"
 local HEARTBEAT_SEC = 10
