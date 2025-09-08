@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer or Players:GetPlayers()[1]
 
--- Egg chances table (updated / merged)
+-- Egg chances table
 local eggChances = {
     ["Anti Bee Egg"] = {{name="Wasp",chance=55},{name="Tarantula Hawk",chance=30},{name="Moth",chance=13.75},{name="Butterfly",chance=1},{name="Disco Bee (Divine)",chance=15}},
     ["Bee Egg"] = {{name="Bee",chance=65},{name="Honey Bee",chance=25},{name="Bear Bee",chance=5},{name="Petal Bee",chance=4},{name="Queen Bee",chance=1}},
@@ -47,15 +47,17 @@ local eggChances = {
     }
 }
 
--- Tracks ESP visibility state
+-- ESP state
 local espEnabled = false
+local espBillboards = {}
+local MAX_DISTANCE = 60 -- studs max distance for ESP
 
--- Pet rarity color (Divine = Gold, Normal = Green)
+-- Pet rarity color
 local function getPetRarityColor(petName)
     if petName:find("%(Divine%)") then
-        return Color3.fromRGB(255, 215, 0)
+        return Color3.fromRGB(255, 215, 0) -- Gold
     end
-    return Color3.fromRGB(85, 255, 85)
+    return Color3.fromRGB(120, 255, 120) -- Soft green
 end
 
 -- Weighted random pet selector
@@ -86,22 +88,22 @@ gui.ResetOnSpawn = false
 local mainFrame = Instance.new("Frame", gui)
 mainFrame.Size = UDim2.new(0, 180, 0, 40)
 mainFrame.Position = UDim2.new(0.78, 0, 0.05, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 45, 0)
-mainFrame.BorderColor3 = Color3.fromRGB(0, 255, 0)
-mainFrame.BorderSizePixel = 2
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+mainFrame.BorderColor3 = Color3.fromRGB(0, 200, 0)
+mainFrame.BorderSizePixel = 1
 mainFrame.Active = true
 mainFrame.Draggable = true
 
 local toggleBtn = Instance.new("TextButton", mainFrame)
 toggleBtn.Size = UDim2.new(1, 0, 1, 0)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 60, 0)
-toggleBtn.TextColor3 = Color3.new(0.3, 1, 0.3)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+toggleBtn.TextColor3 = Color3.fromRGB(0, 255, 140)
 toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.TextSize = 16
 toggleBtn.Text = "Sam Scripts Official ⏬"
 toggleBtn.AutoButtonColor = false
 
--- Scrollable buttonHolder
+-- Dropdown holder
 local buttonHolder = Instance.new("ScrollingFrame", mainFrame)
 buttonHolder.Position = UDim2.new(0, 0, 1, 0)
 buttonHolder.Size = UDim2.new(1, 0, 0, 120)
@@ -116,21 +118,20 @@ local layout = Instance.new("UIListLayout", buttonHolder)
 layout.Padding = UDim.new(0, 5)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- ESP Button
+-- Buttons
 local espBtn = Instance.new("TextButton", buttonHolder)
-espBtn.Size = UDim2.new(1, 0, 0, 40)
-espBtn.BackgroundColor3 = Color3.fromRGB(0, 90, 0)
-espBtn.TextColor3 = Color3.new(0.3, 1, 0.3)
+espBtn.Size = UDim2.new(1, 0, 0, 35)
+espBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+espBtn.TextColor3 = Color3.fromRGB(0, 255, 140)
 espBtn.Font = Enum.Font.GothamBold
 espBtn.TextSize = 15
 espBtn.Text = "Egg ESP"
 espBtn.LayoutOrder = 1
 
--- Randomize Button
 local randBtn = Instance.new("TextButton", buttonHolder)
-randBtn.Size = UDim2.new(1, 0, 0, 40)
-randBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-randBtn.TextColor3 = Color3.new(0.5, 1, 0.5)
+randBtn.Size = UDim2.new(1, 0, 0, 35)
+randBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+randBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
 randBtn.Font = Enum.Font.GothamBold
 randBtn.TextSize = 15
 randBtn.Text = "Randomize Egg"
@@ -142,128 +143,120 @@ toggleBtn.MouseButton1Click:Connect(function()
     toggleBtn.Text = buttonHolder.Visible and "Sam Scripts Official ⏫" or "Sam Scripts Official ⏬"
 end)
 
--- Table to store ESP Billboards
-local espBillboards = {}
-local MAX_DISTANCE = 60 -- studs max distance for ESP
-
 -- Clear ESP
 local function clearESP()
-	for eggModel, billboard in pairs(espBillboards) do
-		if billboard and billboard.Parent then
-			billboard:Destroy()
-		end
-	end
-	espBillboards = {}
+    for eggModel, billboard in pairs(espBillboards) do
+        if billboard and billboard.Parent then
+            billboard:Destroy()
+        end
+    end
+    espBillboards = {}
 end
 
--- Recursive egg finder
+-- Find eggs recursively
 local function findEggModels(root)
-	local eggs = {}
-	for _, child in pairs(root:GetChildren()) do
-		if eggChances[child.Name] then
-			table.insert(eggs, child)
-		end
-		for _, subchild in pairs(findEggModels(child)) do
-			table.insert(eggs, subchild)
-		end
-	end
-	return eggs
+    local eggs = {}
+    for _, child in pairs(root:GetChildren()) do
+        if eggChances[child.Name] then
+            table.insert(eggs, child)
+        end
+        for _, subchild in pairs(findEggModels(child)) do
+            table.insert(eggs, subchild)
+        end
+    end
+    return eggs
 end
 
--- Create ESP for an egg
+-- Create ESP
 local function createESP(eggModel)
-	if espBillboards[eggModel] then return end
+    if espBillboards[eggModel] then return end
 
-	local adornee = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
-	if not adornee then return end
+    local adornee = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
+    if not adornee then return end
 
-	local eggName = eggModel.Name
-	if not eggChances[eggName] then return end
+    local eggName = eggModel.Name
+    if not eggChances[eggName] then return end
 
-	local petName = getRandomPet(eggName)
+    local petName = getRandomPet(eggName)
 
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "EggESP"
-	billboard.Adornee = adornee
-	billboard.Size = UDim2.new(0, 140, 0, 50)
-	billboard.AlwaysOnTop = true
-	billboard.StudsOffset = Vector3.new(0, 3, 0)
-	billboard.Parent = CoreGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "EggESP"
+    billboard.Adornee = adornee
+    billboard.Size = UDim2.new(0, 120, 0, 45)
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.Parent = CoreGui
 
-	local eggLabel = Instance.new("TextLabel", billboard)
-	eggLabel.Size = UDim2.new(1, 0, 0.5, 0)
-	eggLabel.Position = UDim2.new(0, 0, 0, 0)
-	eggLabel.BackgroundTransparency = 1
-	eggLabel.Text = eggName
-	eggLabel.TextColor3 = Color3.new(0.8, 1, 0.8)
-	eggLabel.TextStrokeTransparency = 0.3
-	eggLabel.Font = Enum.Font.GothamBold
-	eggLabel.TextScaled = true
+    local eggLabel = Instance.new("TextLabel", billboard)
+    eggLabel.Name = "EggLabel"
+    eggLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    eggLabel.Position = UDim2.new(0, 0, 0, 0)
+    eggLabel.BackgroundTransparency = 1
+    eggLabel.Text = eggName
+    eggLabel.TextColor3 = Color3.fromRGB(200, 255, 200)
+    eggLabel.TextStrokeTransparency = 0.2
+    eggLabel.Font = Enum.Font.GothamBold
+    eggLabel.TextScaled = true
 
-	local petLabel = Instance.new("TextLabel", billboard)
-	petLabel.Size = UDim2.new(1, 0, 0.5, 0)
-	petLabel.Position = UDim2.new(0, 0, 0.5, 0)
-	petLabel.BackgroundTransparency = 1
-	petLabel.Text = petName
-	petLabel.TextColor3 = getPetRarityColor(petName)
-	petLabel.TextStrokeTransparency = 0.3
-	petLabel.Font = Enum.Font.GothamBold
-	petLabel.TextScaled = true
+    local petLabel = Instance.new("TextLabel", billboard)
+    petLabel.Name = "PetLabel"
+    petLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    petLabel.Position = UDim2.new(0, 0, 0.5, 0)
+    petLabel.BackgroundTransparency = 1
+    petLabel.Text = "[" .. petName .. "]"
+    petLabel.TextColor3 = getPetRarityColor(petName)
+    petLabel.TextStrokeTransparency = 0.2
+    petLabel.Font = Enum.Font.GothamBold
+    petLabel.TextScaled = true
 
-	espBillboards[eggModel] = billboard
+    espBillboards[eggModel] = billboard
 end
 
--- Refresh all ESP with proximity filter
+-- Refresh ESP
 local function refreshESP()
-	clearESP()
-	if not espEnabled then return end
+    clearESP()
+    if not espEnabled then return end
 
-	local eggs = findEggModels(Workspace)
-	local char = LocalPlayer.Character
-	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-	local hrp = char.HumanoidRootPart
+    local eggs = findEggModels(Workspace)
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = char.HumanoidRootPart
 
-	for _, egg in ipairs(eggs) do
-		local adornee = egg.PrimaryPart or egg:FindFirstChildWhichIsA("BasePart")
-		if adornee then
-			local dist = (hrp.Position - adornee.Position).Magnitude
-			if dist <= MAX_DISTANCE then
-				createESP(egg)
-			end
-		end
-	end
+    for _, egg in ipairs(eggs) do
+        local adornee = egg.PrimaryPart or egg:FindFirstChildWhichIsA("BasePart")
+        if adornee then
+            local dist = (hrp.Position - adornee.Position).Magnitude
+            if dist <= MAX_DISTANCE then
+                createESP(egg)
+            end
+        end
+    end
 end
 
--- Randomize function
+-- Randomize pets
 local function randomizePets()
-	for eggModel, billboard in pairs(espBillboards) do
-		if billboard and billboard.Parent then
-			local petLabel
-			for _, child in pairs(billboard:GetChildren()) do
-				if child:IsA("TextLabel") and child.Position.Y.Scale > 0 then
-					petLabel = child
-					break
-				end
-			end
-			if petLabel then
-				local newPet = getRandomPet(eggModel.Name)
-				petLabel.Text = newPet
-				petLabel.TextColor3 = getPetRarityColor(newPet)
-			end
-		end
-	end
+    for eggModel, billboard in pairs(espBillboards) do
+        if billboard and billboard.Parent then
+            local petLabel = billboard:FindFirstChild("PetLabel")
+            if petLabel then
+                local newPet = getRandomPet(eggModel.Name)
+                petLabel.Text = "[" .. newPet .. "]"
+                petLabel.TextColor3 = getPetRarityColor(newPet)
+            end
+        end
+    end
 end
 
 -- ESP toggle button logic
 espBtn.MouseButton1Click:Connect(function()
-	espEnabled = not espEnabled
-	if espEnabled then
-		refreshESP()
-		espBtn.Text = "ESP ✅ ON"
-	else
-		clearESP()
-		espBtn.Text = "ESP ❌ OFF"
-	end
+    espEnabled = not espEnabled
+    if espEnabled then
+        refreshESP()
+        espBtn.Text = "ESP ✅ ON"
+    else
+        clearESP()
+        espBtn.Text = "ESP ❌ OFF"
+    end
 end)
 
 -- Randomize button logic
