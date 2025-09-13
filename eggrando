@@ -52,12 +52,9 @@ local espEnabled = false
 local espBillboards = {}
 local MAX_DISTANCE = 60 -- studs max distance for ESP
 
--- Pet rarity color
-local function getPetRarityColor(petName)
-    if petName:find("%(Divine%)") then
-        return Color3.fromRGB(255, 215, 0) -- Gold
-    end
-    return Color3.fromRGB(120, 255, 120) -- Soft green
+-- Utility: Title Case
+local function toTitleCase(str)
+    return string.gsub(str:lower(), "(%l)(%w*)", function(a,b) return string.upper(a)..b end)
 end
 
 -- Weighted random pet selector
@@ -149,6 +146,10 @@ local function clearESP()
         if billboard and billboard.Parent then
             billboard:Destroy()
         end
+        local hlFolder = eggModel:FindFirstChild("EggHighlights")
+        if hlFolder then hlFolder:Destroy() end
+        local cover = eggModel:FindFirstChild("EggCover")
+        if cover then cover:Destroy() end
     end
     espBillboards = {}
 end
@@ -192,10 +193,10 @@ local function createESP(eggModel)
     eggLabel.Size = UDim2.new(1, 0, 0.5, 0)
     eggLabel.Position = UDim2.new(0, 0, 0, 0)
     eggLabel.BackgroundTransparency = 1
-    eggLabel.Text = eggName
-    eggLabel.TextColor3 = Color3.fromRGB(200, 255, 200)
+    eggLabel.Text = string.upper(eggName)
+    eggLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- WHITE FONT
     eggLabel.TextStrokeTransparency = 0.2
-    eggLabel.Font = Enum.Font.GothamBold
+    eggLabel.Font = Enum.Font.SourceSansBold
     eggLabel.TextScaled = true
 
     local petLabel = Instance.new("TextLabel", billboard)
@@ -203,11 +204,38 @@ local function createESP(eggModel)
     petLabel.Size = UDim2.new(1, 0, 0.5, 0)
     petLabel.Position = UDim2.new(0, 0, 0.5, 0)
     petLabel.BackgroundTransparency = 1
-    petLabel.Text = "[" .. petName .. "]"
-    petLabel.TextColor3 = getPetRarityColor(petName)
+    petLabel.Text = toTitleCase(petName)
+    petLabel.TextColor3 = Color3.fromRGB(0, 150, 255)
     petLabel.TextStrokeTransparency = 0.2
     petLabel.Font = Enum.Font.GothamBold
     petLabel.TextScaled = true
+
+    -- thick outline highlights
+    if not eggModel:FindFirstChild("EggHighlights") then
+        local folder = Instance.new("Folder")
+        folder.Name = "EggHighlights"
+        folder.Parent = eggModel
+        for i = 1, 4 do
+            local hl = Instance.new("Highlight")
+            hl.Name = "HL_" .. i
+            hl.Adornee = eggModel
+            hl.FillTransparency = 1
+            hl.OutlineTransparency = 0
+            hl.OutlineColor = Color3.fromRGB(0, 150, 255)
+            hl.Parent = folder
+        end
+    end
+
+    -- cover aura
+    if not eggModel:FindFirstChild("EggCover") then
+        local cover = Instance.new("SelectionBox")
+        cover.Name = "EggCover"
+        cover.Adornee = eggModel
+        cover.LineThickness = 0.1
+        cover.SurfaceTransparency = 0.5
+        cover.Color3 = Color3.fromRGB(0, 150, 255)
+        cover.Parent = eggModel
+    end
 
     espBillboards[eggModel] = billboard
 end
@@ -240,8 +268,8 @@ local function randomizePets()
             local petLabel = billboard:FindFirstChild("PetLabel")
             if petLabel then
                 local newPet = getRandomPet(eggModel.Name)
-                petLabel.Text = "[" .. newPet .. "]"
-                petLabel.TextColor3 = getPetRarityColor(newPet)
+                petLabel.Text = toTitleCase(newPet)
+                petLabel.TextColor3 = Color3.fromRGB(0, 150, 255)
             end
         end
     end
