@@ -1,121 +1,124 @@
--- Services
+	-- Services
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer or Players:GetPlayers()[1]
 
--- Egg chances table
+local RunService = game:GetService("RunService")
+
+-- Egg chances table (last pet = 20% divine, others = 50%)
 local eggChances = {
     ["Anti Bee Egg"] = {
-        {name="Wasp",chance=55},
-        {name="Tarantula Hawk",chance=30},
-        {name="Moth",chance=13.75},
-        {name="Butterfly",chance=1},
-        {name="Disco Bee",chance=54}
+        {name="Wasp", chance=50},
+        {name="Tarantula Hawk", chance=50},
+        {name="Moth", chance=50},
+        {name="Butterfly", chance=50},
+        {name="Disco Bee", chance=20, divine=true}
     },
     ["Bee Egg"] = {
-        {name="Bee",chance=65},
-        {name="Honey Bee",chance=25},
-        {name="Bear Bee",chance=5},
-        {name="Petal Bee",chance=4},
-        {name="Queen Bee",chance=1}
+        {name="Bee", chance=50},
+        {name="Honey Bee", chance=50},
+        {name="Bear Bee", chance=50},
+        {name="Petal Bee", chance=50},
+        {name="Queen Bee", chance=20, divine=true}
     },
     ["Bug Egg"] = {
-        {name="Snail",chance=40},
-        {name="Giant Ant",chance=30},
-        {name="Caterpillar",chance=25},
-        {name="Praying Mantis",chance=4},
-        {name="Dragonfly ",chance=23}
+        {name="Snail", chance=50},
+        {name="Giant Ant", chance=50},
+        {name="Caterpillar", chance=50},
+        {name="Praying Mantis", chance=50},
+        {name="Dragonfly", chance=20, divine=true}
     },
     ["Dinosaur Egg"] = {
-        {name="Raptor",chance=35},
-        {name="Triceratops",chance=32.5},
-        {name="Stegosaurus",chance=28},
-        {name="Pterodactyl",chance=3},
-        {name="Brontosaurus",chance=1},
-        {name="T-Rex ",chance=47}
+        {name="Raptor", chance=50},
+        {name="Triceratops", chance=50},
+        {name="Stegosaurus", chance=50},
+        {name="Pterodactyl", chance=50},
+        {name="Brontosaurus", chance=50},
+        {name="T-Rex", chance=20, divine=true}
     },
     ["Legendary Egg"] = {
-        {name="Cow",chance=43},
-        {name="Silver Monkey",chance=43},
-        {name="Sea Otter",chance=11},
-        {name="Turtle",chance=2},
-        {name="Polar Bear",chance=2}
+        {name="Cow", chance=50},
+        {name="Silver Monkey", chance=50},
+        {name="Sea Otter", chance=50},
+        {name="Turtle", chance=50},
+        {name="Polar Bear", chance=20, divine=true}
     },
     ["Mythical Egg"] = {
-        {name="Grey Mouse",chance=36},
-        {name="Brown Mouse",chance=27},
-        {name="Squirrel",chance=27},
-        {name="Red Giant Ant",chance=9},
-        {name="Red Fox",chance=2}
+        {name="Grey Mouse", chance=50},
+        {name="Brown Mouse", chance=50},
+        {name="Squirrel", chance=50},
+        {name="Red Giant Ant", chance=50},
+        {name="Red Fox", chance=20, divine=true}
     },
     ["Night Egg"] = {
-        {name="Hedgehog",chance=49},
-        {name="Mole",chance=23.5},
-        {name="Frog",chance=17.63},
-        {name="Echo Frog",chance=8.23},
-        {name="Night Owl",chance=3.53},
-        {name="Raccoon",chance=10}
+        {name="Hedgehog", chance=50},
+        {name="Mole", chance=50},
+        {name="Frog", chance=50},
+        {name="Echo Frog", chance=50},
+        {name="Night Owl", chance=50},
+        {name="Raccoon", chance=20, divine=true}
     },
     ["Oasis Egg"] = {
-        {name="Meerkat",chance=45},
-        {name="Sand Snake",chance=34.5},
-        {name="Axolotl",chance=15},
-        {name="Hyacinth Macaw",chance=5},
-        {name="Fennec Fox",chance=0.5}
+        {name="Meerkat", chance=50},
+        {name="Sand Snake", chance=50},
+        {name="Axolotl", chance=50},
+        {name="Hyacinth Macaw", chance=50},
+        {name="Fennec Fox", chance=20, divine=true}
     },
     ["Paradise Egg"] = {
-        {name="Ostrich",chance=40},
-        {name="Peacock",chance=30},
-        {name="Capybara",chance=21},
-        {name="Scarlet Macaw",chance=8},
-        {name="Mimic Octopus",chance=9}
+        {name="Ostrich", chance=50},
+        {name="Peacock", chance=50},
+        {name="Capybara", chance=50},
+        {name="Scarlet Macaw", chance=50},
+        {name="Mimic Octopus", chance=20, divine=true}
     },
     ["Primal Egg"] = {
-        {name="Parasaurolophus",chance=35},
-        {name="Iguanodon",chance=32.5},
-        {name="Pachycephalosaurus",chance=28},
-        {name="Dilophosaurus",chance=3},
-        {name="Ankylosaurus",chance=1},
-        {name="Spinosaurus",chance=0.5}
+        {name="Parasaurolophus", chance=50},
+        {name="Iguanodon", chance=50},
+        {name="Pachycephalosaurus", chance=50},
+        {name="Dilophosaurus", chance=50},
+        {name="Ankylosaurus", chance=50},
+        {name="Spinosaurus", chance=20, divine=true}
     },
     ["Zen Egg"] = {
-        {name="Shiba Inu",chance=49},
-        {name="Nihonzaru",chance=23.5},
-        {name="Tanuki",chance=17.63},
-        {name="Tanchozuru",chance=8.23},
-        {name="Kappa",chance=3.53},
-        {name="Kitsune",chance=28}
+        {name="Shiba Inu", chance=50},
+        {name="Nihonzaru", chance=50},
+        {name="Tanuki", chance=50},
+        {name="Tanchozuru", chance=50},
+        {name="Kappa", chance=50},
+        {name="Kitsune", chance=20, divine=true}
     },
     ["Enchanted Egg"] = {
         {name="Ladybug", chance=50},
-        {name="Pixie", chance=29},
-        {name="Imp", chance=15},
-        {name="Glimmering Sprite", chance=5},
-        {name="Cockatrice", chance=9}
+        {name="Pixie", chance=50},
+        {name="Imp", chance=50},
+        {name="Glimmering Sprite", chance=50},
+        {name="Cockatrice", chance=20, divine=true}
     },
     ["Sprout Egg"] = {
         {name="Dairy Cow", chance=50},
-        {name="Jackalope", chance=31},
-        {name="Seedling", chance=12},
-        {name="Golem", chance=6},
-        {name="Golden Goose", chance=11}
+        {name="Jackalope", chance=50},
+        {name="Seedling", chance=50},
+        {name="Golem", chance=50},
+        {name="Golden Goose", chance=20, divine=true}
     },
     ["Gourmet Egg"] = {
         {name="Bagel Bunny", chance=50},
-        {name="Pancake Mole", chance=38},
-        {name="Sushi Bear", chance=7},
-        {name="Spaghetti Sloth", chance=4},
-        {name="French Fry Ferret", chance=1}
+        {name="Pancake Mole", chance=50},
+        {name="Sushi Bear", chance=50},
+        {name="Spaghetti Sloth", chance=50},
+        {name="French Fry Ferret", chance=20, divine=true}
     }
 }
 
 -- ESP state
 local espEnabled = false
 local espBillboards = {}
+local assignedPets = {}
 local MAX_DISTANCE = 60
 
--- Utility: Title Case
+-- Utility
 local function toTitleCase(str)
     return string.gsub(str:lower(), "(%l)(%w*)", function(a,b) return string.upper(a)..b end)
 end
@@ -123,106 +126,251 @@ end
 -- Weighted random pet selector
 local function getRandomPet(eggName)
     local pets = eggChances[eggName]
-    if not pets then return "Unknown" end
-    local totalChance = 0
-    for _, pet in ipairs(pets) do
-        totalChance += pet.chance
-    end
-    local roll = math.random() * totalChance
+    if not pets then return "Unknown", false end
+    local total = 0
+    for _, pet in ipairs(pets) do total += pet.chance end
+    local roll = math.random() * total
     local sum = 0
     for _, pet in ipairs(pets) do
         sum += pet.chance
         if roll <= sum then
-            return pet.name
+            return pet.name, pet.divine or false
         end
     end
-    return pets[#pets].name
+    return pets[#pets].name, pets[#pets].divine or false
 end
 
--- GUI setup
+local function getRarity(petInfo)
+    if petInfo.divine then
+        return " ðŸ’Ž", Color3.fromRGB(255, 215, 0) -- Divine/Legendary = gold
+    else
+        return " â­", Color3.fromRGB(0, 150, 255) -- Rare = blue
+    end
+    -- If you ever want true "common" pets with no rarity, just return "", white here
+end
+-----------------------
+
 local gui = Instance.new("ScreenGui")
-gui.Name = "SamScriptsOfficial_GUI"
+gui.Name = "EggESP_GUI"
 gui.Parent = CoreGui
 gui.ResetOnSpawn = false
 
+-- Main Frame with Background
 local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0, 180, 0, 40)
+mainFrame.Size = UDim2.new(0, 220, 0, 50)
 mainFrame.Position = UDim2.new(0.78, 0, 0.05, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-mainFrame.BorderColor3 = Color3.fromRGB(0, 200, 0)
-mainFrame.BorderSizePixel = 1
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BackgroundTransparency = 1 -- make it fully transparent because we'll use a custom bg
+mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
+mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 
+-- Rounded corners
+local mainCorner = Instance.new("UICorner", mainFrame)
+mainCorner.CornerRadius = UDim.new(0, 10)
+
+-- UIGradient for modern look
+local gradient = Instance.new("UIGradient", mainFrame)
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(30,30,30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(15,15,15))
+}
+
+local bg = Instance.new("Frame", mainFrame)
+bg.Size = UDim2.new(1, 0, 1, 0) -- full size of the mainFrame
+bg.Position = UDim2.new(0, 0, 0, 0)
+bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+bg.BackgroundTransparency = 0.5 -- semi-transparent
+bg.ZIndex = 0 -- behind buttons
+local bgCorner = Instance.new("UICorner", bg)
+bgCorner.CornerRadius = UDim.new(0, 10)
+
+-- Shadow effect
+local shadow = Instance.new("Frame", mainFrame)
+shadow.Size = UDim2.new(1, 8, 1, 8)
+shadow.Position = UDim2.new(0, -4, 0, -4)
+shadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
+shadow.BackgroundTransparency = 0.7
+shadow.ZIndex = 0
+shadow.ClipsDescendants = true
+local shadowCorner = Instance.new("UICorner", shadow)
+shadowCorner.CornerRadius = UDim.new(0, 10)
+
+-- Toggle Button
 local toggleBtn = Instance.new("TextButton", mainFrame)
-toggleBtn.Size = UDim2.new(1, 0, 1, 0)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-toggleBtn.TextColor3 = Color3.fromRGB(0, 255, 140)
+toggleBtn.Size = UDim2.new(1, -30, 1, 0) -- leave space for close button
+toggleBtn.Position = UDim2.new(0, 0, 0, 0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+toggleBtn.TextColor3 = Color3.fromRGB(0, 255, 160)
 toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.TextSize = 16
-toggleBtn.Text = "Sam Scripts Official ⏬"
+toggleBtn.Text = "Egg ESP â¬"
 toggleBtn.AutoButtonColor = false
 
-local buttonHolder = Instance.new("ScrollingFrame", mainFrame)
-buttonHolder.Position = UDim2.new(0, 0, 1, 0)
-buttonHolder.Size = UDim2.new(1, 0, 0, 120)
+local toggleCorner = Instance.new("UICorner", toggleBtn)
+toggleCorner.CornerRadius = UDim.new(0, 10)
+
+-- Hover effect
+toggleBtn.MouseEnter:Connect(function()
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+end)
+toggleBtn.MouseLeave:Connect(function()
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+end)
+
+-- Close Button
+local closeBtn = Instance.new("TextButton", mainFrame)
+closeBtn.Size = UDim2.new(0, 25, 0, 25)
+closeBtn.Position = UDim2.new(1, -28, 0, 3)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+closeBtn.Text = "âœ•"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 16
+closeBtn.AutoButtonColor = false
+
+local closeCorner = Instance.new("UICorner", closeBtn)
+closeCorner.CornerRadius = UDim.new(0, 6)
+
+closeBtn.MouseEnter:Connect(function()
+    closeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+end)
+closeBtn.MouseLeave:Connect(function()
+    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy() -- kills everything
+end)
+
+-- Button Holder Background
+local buttonBg = Instance.new("Frame", mainFrame)
+buttonBg.Position = UDim2.new(0, 0, 1, 5)
+buttonBg.Parent = mainFrame
+buttonBg.Size = UDim2.new(1, 0, 0, 100)
+buttonBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+buttonBg.BackgroundTransparency = 0.5 -- semi-transparent
+buttonBg.ZIndex = 0
+buttonBg.Visible = false
+local bgCorner2 = Instance.new("UICorner", buttonBg)
+bgCorner2.CornerRadius = UDim.new(0, 10)
+
+-- Button Holder
+local buttonHolder = Instance.new("Frame", buttonBg)
+buttonHolder.Parent = buttonBg
+buttonHolder.Position = UDim2.new(0, 0, 0, 0)
+buttonHolder.Size = UDim2.new(1, 0, 1, 0)
 buttonHolder.BackgroundTransparency = 1
 buttonHolder.Visible = false
-buttonHolder.AutomaticCanvasSize = Enum.AutomaticSize.Y
-buttonHolder.ScrollBarThickness = 6
-buttonHolder.ClipsDescendants = true
 
 local layout = Instance.new("UIListLayout", buttonHolder)
-layout.Padding = UDim.new(0, 5)
+layout.Padding = UDim.new(0, 6)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
+-- ESP Button
 local espBtn = Instance.new("TextButton", buttonHolder)
 espBtn.Size = UDim2.new(1, 0, 0, 35)
-espBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-espBtn.TextColor3 = Color3.fromRGB(0, 255, 140)
+espBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+espBtn.TextColor3 = Color3.fromRGB(0, 255, 160)
 espBtn.Font = Enum.Font.GothamBold
 espBtn.TextSize = 15
-espBtn.Text = "Egg ESP"
+espBtn.Text = "ESP"
 espBtn.LayoutOrder = 1
+local espCorner = Instance.new("UICorner", espBtn)
+espCorner.CornerRadius = UDim.new(0, 8)
 
+-- Randomizer Button
 local randBtn = Instance.new("TextButton", buttonHolder)
 randBtn.Size = UDim2.new(1, 0, 0, 35)
-randBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+randBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
 randBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
 randBtn.Font = Enum.Font.GothamBold
 randBtn.TextSize = 15
 randBtn.Text = "Randomize Egg"
 randBtn.LayoutOrder = 2
+local randCorner = Instance.new("UICorner", randBtn)
+randCorner.CornerRadius = UDim.new(0, 8)
 
+-- Hover effects for buttons
+for _, btn in pairs({espBtn, randBtn}) do
+    btn.MouseEnter:Connect(function()
+        btn.BackgroundColor3 = btn.BackgroundColor3:Lerp(Color3.fromRGB(75, 75, 75), 0.5)
+    end)
+    btn.MouseLeave:Connect(function()
+        if btn == espBtn then
+            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+        end
+    end)
+end
+
+-- Toggle button functionality
 toggleBtn.MouseButton1Click:Connect(function()
     buttonHolder.Visible = not buttonHolder.Visible
-    toggleBtn.Text = buttonHolder.Visible and "Sam Scripts Official ⏫" or "Sam Scripts Official ⏬"
+    buttonBg.Visible = buttonHolder.Visible -- show/hide background too
+    toggleBtn.Text = buttonHolder.Visible and "Egg ESP â«" or "Egg ESP â¬"
 end)
+
+-- Drag functionality
+local UserInputService = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(
+        0, startPos.X + delta.X,
+        0, startPos.Y + delta.Y
+    )
+end
+
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or
+       input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Vector2.new(mainFrame.Position.X.Offset, mainFrame.Position.Y.Offset)
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or
+       input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+--------------------------------
 
 -- Clear ESP
 local function clearESP()
-    for eggModel, billboard in pairs(espBillboards) do
-        if billboard and billboard.Parent then
-            billboard:Destroy()
-        end
-        local hlFolder = eggModel:FindFirstChild("EggHighlights")
-        if hlFolder then hlFolder:Destroy() end
-        local cover = eggModel:FindFirstChild("EggCover")
+    for egg, billboard in pairs(espBillboards) do
+        if billboard and billboard.Parent then billboard:Destroy() end
+        local cover = egg:FindFirstChild("EggCover")
         if cover then cover:Destroy() end
     end
     espBillboards = {}
+    assignedPets = {}
 end
 
--- Find eggs recursively
+-- Find all eggs
 local function findEggModels(root)
     local eggs = {}
     for _, child in pairs(root:GetChildren()) do
-        if eggChances[child.Name] then
-            table.insert(eggs, child)
-        end
-        for _, subchild in pairs(findEggModels(child)) do
-            table.insert(eggs, subchild)
-        end
+        if eggChances[child.Name] then table.insert(eggs, child) end
+        for _, sub in pairs(findEggModels(child)) do table.insert(eggs, sub) end
     end
     return eggs
 end
@@ -230,63 +378,59 @@ end
 -- Create ESP
 local function createESP(eggModel)
     if espBillboards[eggModel] then return end
-    local adornee = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
-    if not adornee then return end
-    local eggName = eggModel.Name
-    if not eggChances[eggName] then return end
-    local petName = getRandomPet(eggName)
+    local part = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
+    if not part then return end
+
+    if not assignedPets[eggModel] then
+        local pet, divine = getRandomPet(eggModel.Name)
+        assignedPets[eggModel] = {name=pet, divine=divine}
+    end
+    local petInfo = assignedPets[eggModel]
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "EggESP"
-    billboard.Adornee = adornee
-    billboard.Size = UDim2.new(0, 120, 0, 45)
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0,120,0,50)
     billboard.AlwaysOnTop = true
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.StudsOffset = Vector3.new(0,3,0)
     billboard.Parent = CoreGui
 
     local eggLabel = Instance.new("TextLabel", billboard)
-    eggLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    eggLabel.Size = UDim2.new(1,0,0.5,0)
     eggLabel.BackgroundTransparency = 1
-    eggLabel.Text = string.upper(eggName)
-    eggLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- white
+    eggLabel.Text = eggModel.Name
+    eggLabel.TextColor3 = Color3.fromRGB(255,255,255)
     eggLabel.TextStrokeTransparency = 0.2
     eggLabel.Font = Enum.Font.SourceSansBold
     eggLabel.TextScaled = true
 
     local petLabel = Instance.new("TextLabel", billboard)
     petLabel.Name = "PetLabel"
-    petLabel.Size = UDim2.new(1, 0, 0.5, 0)
-    petLabel.Position = UDim2.new(0, 0, 0.5, 0)
+    petLabel.Size = UDim2.new(1,0,0.5,0)
+    petLabel.Position = UDim2.new(0,0,0.5,0)
     petLabel.BackgroundTransparency = 1
-    petLabel.Text = toTitleCase(petName)
-    petLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- 🔴 red pet text
+	local tag, color = getRarity(petInfo)
+	petLabel.Text = toTitleCase(petInfo.name) .. tag
+	petLabel.TextColor3 = color or Color3.fromRGB(255,255,255)
+
+
     petLabel.TextStrokeTransparency = 0.2
     petLabel.Font = Enum.Font.GothamBold
     petLabel.TextScaled = true
 
-    if not eggModel:FindFirstChild("EggHighlights") then
-        local folder = Instance.new("Folder")
-        folder.Name = "EggHighlights"
-        folder.Parent = eggModel
-        for i = 1, 4 do
-            local hl = Instance.new("Highlight")
-            hl.Adornee = eggModel
-            hl.FillTransparency = 1
-            hl.OutlineTransparency = 0
-            hl.OutlineColor = Color3.fromRGB(0, 150, 255) -- 🔵 blue
-            hl.Parent = folder
-        end
-    end
-
-    if not eggModel:FindFirstChild("EggCover") then
-        local cover = Instance.new("SelectionBox")
-        cover.Name = "EggCover"
-        cover.Adornee = eggModel
-        cover.LineThickness = 0.1
-        cover.SurfaceTransparency = 0.5
-        cover.Color3 = Color3.fromRGB(0, 150, 255) -- 🔵 blue outline
-        cover.Parent = eggModel
-    end
+	if not eggModel:FindFirstChild("EggCover") then
+    	local cover = Instance.new("SelectionBox")
+    	cover.Name = "EggCover"
+    	cover.Adornee = eggModel
+    	cover.LineThickness = 0.1
+    	cover.SurfaceTransparency = 0.5
+    	cover.Color3 = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
+    	cover.Parent = eggModel
+	else
+    	-- Update existing box color
+    	local cover = eggModel:FindFirstChild("EggCover")
+    	cover.Color3 = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
+	end
 
     espBillboards[eggModel] = billboard
 end
@@ -300,39 +444,51 @@ local function refreshESP()
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
     local hrp = char.HumanoidRootPart
     for _, egg in ipairs(eggs) do
-        local adornee = egg.PrimaryPart or egg:FindFirstChildWhichIsA("BasePart")
-        if adornee then
-            local dist = (hrp.Position - adornee.Position).Magnitude
-            if dist <= MAX_DISTANCE then
-                createESP(egg)
-            end
+        local part = egg.PrimaryPart or egg:FindFirstChildWhichIsA("BasePart")
+        if part and (hrp.Position - part.Position).Magnitude <= MAX_DISTANCE then
+            createESP(egg)
         end
     end
 end
 
--- Randomize pets
-local function randomizePets()
-    for eggModel, billboard in pairs(espBillboards) do
-        if billboard and billboard.Parent then
+-- Randomize button
+randBtn.MouseButton1Click:Connect(function()
+    for egg, _ in pairs(espBillboards) do
+        local pet, divine = getRandomPet(egg.Name)
+        assignedPets[egg] = {name=pet, divine=divine}
+        local billboard = espBillboards[egg]
+        if billboard then
             local petLabel = billboard:FindFirstChild("PetLabel")
-            if petLabel then
-                local newPet = getRandomPet(eggModel.Name)
-                petLabel.Text = toTitleCase(newPet)
-                petLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- 🔴 keep red
-            end
+			if petLabel then
+    			local tag, color = getRarity({name=pet, divine=divine})
+    			petLabel.Text = toTitleCase(pet) .. tag   -- update text
+    			petLabel.TextColor3 = color               -- update color
+			end
+
+			local cover = egg:FindFirstChild("EggCover")
+			if cover then
+    			cover.Color3 = divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
+			end
+        end
+        if divine then
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "You found rare pet!";
+                Text = pet;
+                Duration = 2
+            })
         end
     end
-end
+end)
 
+-- Toggle ESP
 espBtn.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     if espEnabled then
         refreshESP()
-        espBtn.Text = "ESP ✅ ON"
+        espBtn.Text = "ESP âœ… ON"
     else
         clearESP()
-        espBtn.Text = "ESP ❌ OFF"
+        espBtn.Text = "ESP âŒ OFF"
     end
 end)
 
-randBtn.MouseButton1Click:Connect(randomizePets)
