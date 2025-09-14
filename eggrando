@@ -1,9 +1,8 @@
-	-- Services
+-- Services
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer or Players:GetPlayers()[1]
-
 local RunService = game:GetService("RunService")
 
 -- Egg chances table (last pet = 20% divine, others = 50%)
@@ -142,139 +141,96 @@ end
 
 local function getRarity(petInfo)
     if petInfo.divine then
-        return " ðŸ’Ž", Color3.fromRGB(255, 215, 0) -- Divine/Legendary = gold
+        return " [DIVINE]", Color3.fromRGB(255, 215, 0)
     else
-        return " â­", Color3.fromRGB(0, 150, 255) -- Rare = blue
+        return " [RARE]", Color3.fromRGB(0, 150, 255)
     end
-    -- If you ever want true "common" pets with no rarity, just return "", white here
 end
------------------------
 
+-----------------------
+-- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "EggESP_GUI"
 gui.Parent = CoreGui
 gui.ResetOnSpawn = false
 
--- Main Frame with Background
+-- Main Frame (mas maliit, gilid kanan)
 local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0, 220, 0, 50)
-mainFrame.Position = UDim2.new(0.78, 0, 0.05, 0)
+mainFrame.Size = UDim2.new(0, 160, 0, 40)
+mainFrame.Position = UDim2.new(1, -170, 0.05, 0) -- gilid kanan
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mainFrame.BackgroundTransparency = 1 -- make it fully transparent because we'll use a custom bg
+mainFrame.BackgroundTransparency = 1
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
-mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 
--- Rounded corners
 local mainCorner = Instance.new("UICorner", mainFrame)
 mainCorner.CornerRadius = UDim.new(0, 10)
 
--- UIGradient for modern look
-local gradient = Instance.new("UIGradient", mainFrame)
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(30,30,30)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(15,15,15))
-}
-
 local bg = Instance.new("Frame", mainFrame)
-bg.Size = UDim2.new(1, 0, 1, 0) -- full size of the mainFrame
-bg.Position = UDim2.new(0, 0, 0, 0)
+bg.Size = UDim2.new(1, 0, 1, 0)
 bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-bg.BackgroundTransparency = 0.5 -- semi-transparent
-bg.ZIndex = 0 -- behind buttons
+bg.BackgroundTransparency = 0.5
+bg.ZIndex = 0
 local bgCorner = Instance.new("UICorner", bg)
 bgCorner.CornerRadius = UDim.new(0, 10)
 
--- Shadow effect
-local shadow = Instance.new("Frame", mainFrame)
-shadow.Size = UDim2.new(1, 8, 1, 8)
-shadow.Position = UDim2.new(0, -4, 0, -4)
-shadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
-shadow.BackgroundTransparency = 0.7
-shadow.ZIndex = 0
-shadow.ClipsDescendants = true
-local shadowCorner = Instance.new("UICorner", shadow)
-shadowCorner.CornerRadius = UDim.new(0, 10)
-
 -- Toggle Button
 local toggleBtn = Instance.new("TextButton", mainFrame)
-toggleBtn.Size = UDim2.new(1, -30, 1, 0) -- leave space for close button
+toggleBtn.Size = UDim2.new(1, -25, 1, 0)
 toggleBtn.Position = UDim2.new(0, 0, 0, 0)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 toggleBtn.TextColor3 = Color3.fromRGB(0, 255, 160)
 toggleBtn.Font = Enum.Font.GothamBold
-toggleBtn.TextSize = 16
-toggleBtn.Text = "Egg ESP â¬"
+toggleBtn.TextSize = 14
+toggleBtn.Text = "Egg ESP ►"
 toggleBtn.AutoButtonColor = false
-
 local toggleCorner = Instance.new("UICorner", toggleBtn)
 toggleCorner.CornerRadius = UDim.new(0, 10)
 
--- Hover effect
-toggleBtn.MouseEnter:Connect(function()
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-end)
-toggleBtn.MouseLeave:Connect(function()
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-end)
-
 -- Close Button
 local closeBtn = Instance.new("TextButton", mainFrame)
-closeBtn.Size = UDim2.new(0, 25, 0, 25)
-closeBtn.Position = UDim2.new(1, -28, 0, 3)
+closeBtn.Size = UDim2.new(0, 20, 0, 20)
+closeBtn.Position = UDim2.new(1, -22, 0, 2)
 closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-closeBtn.Text = "âœ•"
+closeBtn.Text = "X"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 16
+closeBtn.TextSize = 12
 closeBtn.AutoButtonColor = false
-
 local closeCorner = Instance.new("UICorner", closeBtn)
 closeCorner.CornerRadius = UDim.new(0, 6)
-
-closeBtn.MouseEnter:Connect(function()
-    closeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-end)
-closeBtn.MouseLeave:Connect(function()
-    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-end)
-
 closeBtn.MouseButton1Click:Connect(function()
-    gui:Destroy() -- kills everything
+    gui:Destroy()
 end)
 
--- Button Holder Background
+-- Button Holder
 local buttonBg = Instance.new("Frame", mainFrame)
 buttonBg.Position = UDim2.new(0, 0, 1, 5)
-buttonBg.Parent = mainFrame
-buttonBg.Size = UDim2.new(1, 0, 0, 100)
+buttonBg.Size = UDim2.new(1, 0, 0, 90)
 buttonBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-buttonBg.BackgroundTransparency = 0.5 -- semi-transparent
+buttonBg.BackgroundTransparency = 0.5
 buttonBg.ZIndex = 0
 buttonBg.Visible = false
 local bgCorner2 = Instance.new("UICorner", buttonBg)
 bgCorner2.CornerRadius = UDim.new(0, 10)
 
--- Button Holder
 local buttonHolder = Instance.new("Frame", buttonBg)
-buttonHolder.Parent = buttonBg
-buttonHolder.Position = UDim2.new(0, 0, 0, 0)
 buttonHolder.Size = UDim2.new(1, 0, 1, 0)
 buttonHolder.BackgroundTransparency = 1
 buttonHolder.Visible = false
 
 local layout = Instance.new("UIListLayout", buttonHolder)
-layout.Padding = UDim.new(0, 6)
+layout.Padding = UDim.new(0, 5)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- ESP Button
 local espBtn = Instance.new("TextButton", buttonHolder)
-espBtn.Size = UDim2.new(1, 0, 0, 35)
+espBtn.Size = UDim2.new(1, 0, 0, 30)
 espBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 espBtn.TextColor3 = Color3.fromRGB(0, 255, 160)
 espBtn.Font = Enum.Font.GothamBold
-espBtn.TextSize = 15
+espBtn.TextSize = 14
 espBtn.Text = "ESP"
 espBtn.LayoutOrder = 1
 local espCorner = Instance.new("UICorner", espBtn)
@@ -282,79 +238,26 @@ espCorner.CornerRadius = UDim.new(0, 8)
 
 -- Randomizer Button
 local randBtn = Instance.new("TextButton", buttonHolder)
-randBtn.Size = UDim2.new(1, 0, 0, 35)
+randBtn.Size = UDim2.new(1, 0, 0, 30)
 randBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
 randBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
 randBtn.Font = Enum.Font.GothamBold
-randBtn.TextSize = 15
+randBtn.TextSize = 14
 randBtn.Text = "Randomize Egg"
 randBtn.LayoutOrder = 2
 local randCorner = Instance.new("UICorner", randBtn)
 randCorner.CornerRadius = UDim.new(0, 8)
 
--- Hover effects for buttons
-for _, btn in pairs({espBtn, randBtn}) do
-    btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = btn.BackgroundColor3:Lerp(Color3.fromRGB(75, 75, 75), 0.5)
-    end)
-    btn.MouseLeave:Connect(function()
-        if btn == espBtn then
-            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-        end
-    end)
-end
-
 -- Toggle button functionality
 toggleBtn.MouseButton1Click:Connect(function()
     buttonHolder.Visible = not buttonHolder.Visible
-    buttonBg.Visible = buttonHolder.Visible -- show/hide background too
-    toggleBtn.Text = buttonHolder.Visible and "Egg ESP â«" or "Egg ESP â¬"
-end)
-
--- Drag functionality
-local UserInputService = game:GetService("UserInputService")
-local dragging, dragInput, dragStart, startPos
-
-local function update(input)
-    local delta = input.Position - dragStart
-    mainFrame.Position = UDim2.new(
-        0, startPos.X + delta.X,
-        0, startPos.Y + delta.Y
-    )
-end
-
-mainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or
-       input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = Vector2.new(mainFrame.Position.X.Offset, mainFrame.Position.Y.Offset)
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-mainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or
-       input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
-    end
+    buttonBg.Visible = buttonHolder.Visible
+    toggleBtn.Text = buttonHolder.Visible and "Egg ESP ▼" or "Egg ESP ►"
 end)
 
 --------------------------------
+-- ESP Functions
 
--- Clear ESP
 local function clearESP()
     for egg, billboard in pairs(espBillboards) do
         if billboard and billboard.Parent then billboard:Destroy() end
@@ -365,7 +268,6 @@ local function clearESP()
     assignedPets = {}
 end
 
--- Find all eggs
 local function findEggModels(root)
     local eggs = {}
     for _, child in pairs(root:GetChildren()) do
@@ -375,7 +277,6 @@ local function findEggModels(root)
     return eggs
 end
 
--- Create ESP
 local function createESP(eggModel)
     if espBillboards[eggModel] then return end
     local part = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
@@ -409,33 +310,29 @@ local function createESP(eggModel)
     petLabel.Size = UDim2.new(1,0,0.5,0)
     petLabel.Position = UDim2.new(0,0,0.5,0)
     petLabel.BackgroundTransparency = 1
-	local tag, color = getRarity(petInfo)
-	petLabel.Text = toTitleCase(petInfo.name) .. tag
-	petLabel.TextColor3 = color or Color3.fromRGB(255,255,255)
-
-
+    local tag, color = getRarity(petInfo)
+    petLabel.Text = toTitleCase(petInfo.name) .. tag
+    petLabel.TextColor3 = color or Color3.fromRGB(255,255,255)
     petLabel.TextStrokeTransparency = 0.2
     petLabel.Font = Enum.Font.GothamBold
     petLabel.TextScaled = true
 
-	if not eggModel:FindFirstChild("EggCover") then
-    	local cover = Instance.new("SelectionBox")
-    	cover.Name = "EggCover"
-    	cover.Adornee = eggModel
-    	cover.LineThickness = 0.1
-    	cover.SurfaceTransparency = 0.5
-    	cover.Color3 = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
-    	cover.Parent = eggModel
-	else
-    	-- Update existing box color
-    	local cover = eggModel:FindFirstChild("EggCover")
-    	cover.Color3 = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
-	end
+    if not eggModel:FindFirstChild("EggCover") then
+        local cover = Instance.new("SelectionBox")
+        cover.Name = "EggCover"
+        cover.Adornee = eggModel
+        cover.LineThickness = 0.1
+        cover.SurfaceTransparency = 0.5
+        cover.Color3 = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
+        cover.Parent = eggModel
+    else
+        local cover = eggModel:FindFirstChild("EggCover")
+        cover.Color3 = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
+    end
 
     espBillboards[eggModel] = billboard
 end
 
--- Refresh ESP
 local function refreshESP()
     clearESP()
     if not espEnabled then return end
@@ -451,7 +348,7 @@ local function refreshESP()
     end
 end
 
--- Randomize button
+-- Randomizer Button
 randBtn.MouseButton1Click:Connect(function()
     for egg, _ in pairs(espBillboards) do
         local pet, divine = getRandomPet(egg.Name)
@@ -459,36 +356,34 @@ randBtn.MouseButton1Click:Connect(function()
         local billboard = espBillboards[egg]
         if billboard then
             local petLabel = billboard:FindFirstChild("PetLabel")
-			if petLabel then
-    			local tag, color = getRarity({name=pet, divine=divine})
-    			petLabel.Text = toTitleCase(pet) .. tag   -- update text
-    			petLabel.TextColor3 = color               -- update color
-			end
-
-			local cover = egg:FindFirstChild("EggCover")
-			if cover then
-    			cover.Color3 = divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
-			end
+            if petLabel then
+                local tag, color = getRarity({name=pet, divine=divine})
+                petLabel.Text = toTitleCase(pet) .. tag
+                petLabel.TextColor3 = color
+            end
+            local cover = egg:FindFirstChild("EggCover")
+            if cover then
+                cover.Color3 = divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
+            end
         end
         if divine then
             game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "You found rare pet!";
-                Text = pet;
+                Title = "You found a rare pet!",
+                Text = pet,
                 Duration = 2
             })
         end
     end
 end)
 
--- Toggle ESP
+-- ESP Toggle
 espBtn.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     if espEnabled then
         refreshESP()
-        espBtn.Text = "ESP âœ… ON"
+        espBtn.Text = "ESP ON"
     else
         clearESP()
-        espBtn.Text = "ESP âŒ OFF"
+        espBtn.Text = "ESP OFF"
     end
 end)
-
