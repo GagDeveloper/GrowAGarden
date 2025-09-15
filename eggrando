@@ -139,11 +139,12 @@ local function getRandomPet(eggName)
     return pets[#pets].name, pets[#pets].divine or false
 end
 
+-- Simplified rarity (no [RARE]/[DIVINE])
 local function getRarity(petInfo)
     if petInfo.divine then
-        return " [DIVINE]", Color3.fromRGB(255, 215, 0)
+        return "", Color3.fromRGB(255, 215, 0)
     else
-        return " [RARE]", Color3.fromRGB(0, 150, 255)
+        return "", Color3.fromRGB(0, 150, 255)
     end
 end
 
@@ -154,11 +155,10 @@ gui.Name = "EggESP_GUI"
 gui.Parent = CoreGui
 gui.ResetOnSpawn = false
 
--- Main Frame (mas maliit, gilid kanan)
+-- Main Frame
 local mainFrame = Instance.new("Frame", gui)
 mainFrame.Size = UDim2.new(0, 160, 0, 40)
-mainFrame.Position = UDim2.new(1, -170, 0.05, 0) -- gilid kanan
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.Position = UDim2.new(1, -170, 0.05, 0)
 mainFrame.BackgroundTransparency = 1
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -261,8 +261,8 @@ end)
 local function clearESP()
     for egg, billboard in pairs(espBillboards) do
         if billboard and billboard.Parent then billboard:Destroy() end
-        local cover = egg:FindFirstChild("EggCover")
-        if cover then cover:Destroy() end
+        local highlight = egg:FindFirstChild("EggHighlight")
+        if highlight then highlight:Destroy() end
     end
     espBillboards = {}
     assignedPets = {}
@@ -310,24 +310,24 @@ local function createESP(eggModel)
     petLabel.Size = UDim2.new(1,0,0.5,0)
     petLabel.Position = UDim2.new(0,0,0.5,0)
     petLabel.BackgroundTransparency = 1
-    local tag, color = getRarity(petInfo)
-    petLabel.Text = toTitleCase(petInfo.name) .. tag
+    local _, color = getRarity(petInfo)
+    petLabel.Text = toTitleCase(petInfo.name)
     petLabel.TextColor3 = color or Color3.fromRGB(255,255,255)
     petLabel.TextStrokeTransparency = 0.2
     petLabel.Font = Enum.Font.GothamBold
     petLabel.TextScaled = true
 
-    if not eggModel:FindFirstChild("EggCover") then
-        local cover = Instance.new("SelectionBox")
-        cover.Name = "EggCover"
-        cover.Adornee = eggModel
-        cover.LineThickness = 0.1
-        cover.SurfaceTransparency = 0.5
-        cover.Color3 = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
-        cover.Parent = eggModel
+    if not eggModel:FindFirstChild("EggHighlight") then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "EggHighlight"
+        highlight.Adornee = eggModel
+        highlight.FillTransparency = 1
+        highlight.OutlineTransparency = 0
+        highlight.OutlineColor = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(0,0,255)
+        highlight.Parent = eggModel
     else
-        local cover = eggModel:FindFirstChild("EggCover")
-        cover.Color3 = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
+        local highlight = eggModel:FindFirstChild("EggHighlight")
+        highlight.OutlineColor = petInfo.divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(0,0,255)
     end
 
     espBillboards[eggModel] = billboard
@@ -357,13 +357,13 @@ randBtn.MouseButton1Click:Connect(function()
         if billboard then
             local petLabel = billboard:FindFirstChild("PetLabel")
             if petLabel then
-                local tag, color = getRarity({name=pet, divine=divine})
-                petLabel.Text = toTitleCase(pet) .. tag
+                local _, color = getRarity({name=pet, divine=divine})
+                petLabel.Text = toTitleCase(pet)
                 petLabel.TextColor3 = color
             end
-            local cover = egg:FindFirstChild("EggCover")
-            if cover then
-                cover.Color3 = divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(128,128,128)
+            local highlight = egg:FindFirstChild("EggHighlight")
+            if highlight then
+                highlight.OutlineColor = divine and Color3.fromRGB(0,255,0) or Color3.fromRGB(0,0,255)
             end
         end
         if divine then
